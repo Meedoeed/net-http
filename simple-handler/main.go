@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+)
 
 func greeting(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Добро пожаловать на главную страницу"))
@@ -21,5 +24,8 @@ func main() {
 	mux.HandleFunc("/", greeting)
 	mux.HandleFunc("/hello", hello)
 
-	http.ListenAndServe(":8080", mux)
+	err := http.ListenAndServe(":8080", mux)
+	if err != nil {
+		log.Fatal("server was stopped")
+	}
 }
