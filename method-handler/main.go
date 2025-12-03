@@ -39,9 +39,8 @@ func inspectHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			response += string(body)
 		}
-
-		w.Write([]byte(response))
 	}
+	w.Write([]byte(response))
 }
 
 func main() {
