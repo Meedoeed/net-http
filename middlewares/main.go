@@ -16,7 +16,7 @@ func homeHandler(w http.ResponseWriter, req *http.Request) {
 		http.NotFound(w, req)
 		return
 	}
-	w.Header().Set("Content-type", "text/html; charset=8-utf")
+	w.Header().Set("Content-type", "text/html; charset=utf-8")
 	w.Write([]byte("<h1>Home Page</h1><p>Welcome to the structured server!</p>"))
 }
 
@@ -28,23 +28,25 @@ func (t timeHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		http.NotFound(w, req)
 		return
 	}
-	w.Header().Set("Content-type", "text/plain; charset=8-utf")
+	w.Header().Set("Content-type", "text/plain; charset=utf-8")
 	w.Write([]byte(time.Now().UTC().Format(time.RFC3339)))
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		log.Printf("[INFO] METHOD PATH %s %s", req.Method, req.URL.Path)
+		log.Printf("[INFO] METHOD PATH %s %s (%s)", req.Method, req.URL.Path, req.RemoteAddr)
 		next.ServeHTTP(w, req)
 	})
 }
 
 func recoveryMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		if err := recover(); err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			log.Printf("Panic recovered: %s", err)
-		}
+		defer func() {
+			if err := recover(); err != nil {
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+				log.Printf("Panic recovered: %s", err)
+			}
+		}()
 		next.ServeHTTP(w, req)
 	})
 }
