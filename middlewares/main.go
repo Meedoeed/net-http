@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+type timeHandler struct{}
+
 func homeHandler(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -18,7 +20,7 @@ func homeHandler(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte("<h1>Home Page</h1><p>Welcome to the structured server!</p>"))
 }
 
-func timeHandler(w http.ResponseWriter, req *http.Request) {
+func (t timeHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if req.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
@@ -51,7 +53,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", homeHandler)
-	mux.HandleFunc("/api/time", timeHandler)
+	mux.Handle("/api/time", timeHandler{})
 
 	SuperMux := recoveryMiddleware(loggingMiddleware(mux))
 
