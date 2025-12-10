@@ -13,12 +13,13 @@ var tmpl *template.Template = template.Must(template.ParseFiles(
 	"templates/profile.html",
 ))
 
+type PageData struct {
+	Title    string
+	Error    string
+	Username string
+}
+
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
-	type PageData struct {
-		Title    string
-		Error    string
-		Username string
-	}
 	if r.Method == "GET" {
 		data := PageData{
 			Title:    "Личный кабинет",
@@ -32,10 +33,6 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	type PageData struct {
-		Title string
-		Error string
-	}
 	if r.Method == "GET" {
 		data := PageData{
 			Title: "Вход",
