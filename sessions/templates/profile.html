@@ -1,3 +1,6 @@
 {{define "contentprofile"}}
     <p>Hello, {{.Username}}</p>
+    <form action="/logout" method="POST">
+        <button type = "submit">logout</button>
+    </form>
 {{end}}

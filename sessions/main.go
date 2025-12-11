@@ -56,7 +56,7 @@ func getSession(r *http.Request) (useename string, ok bool) {
 
 func clearSession(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
-	if err != nil {
+	if err == nil {
 		sessionMux.Lock()
 		delete(sessions, cookie.Value)
 		sessionMux.Unlock()
@@ -88,7 +88,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		http.Redirect(w, r, "/login", http.StatusOK) // temporary
+		http.Redirect(w, r, "/login", http.StatusFound) // temporary
 	}
 }
 
@@ -142,8 +142,27 @@ func recoveryMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func SuperHandler(w http.ResponseWriter, r *http.Request) {
+	if _, ok := getSession(r); ok {
+		http.Redirect(w, r, "/profile", http.StatusFound)
+	} else {
+		http.Redirect(w, r, "/login", http.StatusFound)
+	}
+}
+
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	clearSession(w, r)
+	if r.Method == "POST" {
+		http.Redirect(w, r, "/login", http.StatusFound)
+	} else {
+		http.Error(w, "Not allowed method", http.StatusMethodNotAllowed)
+	}
+}
+
 func main() {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/", SuperHandler)
+	mux.HandleFunc("/logout", logoutHandler)
 	mux.HandleFunc("/login", LoginHandler)
 	mux.HandleFunc("/profile", ProfileHandler)
 	MuxModified := recoveryMiddleware(loggingMiddleware(mux))
