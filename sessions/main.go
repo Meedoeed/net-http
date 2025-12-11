@@ -104,23 +104,40 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	if r.Method == "POST" {
-		w.Header().Add("Content-type", "text/html")
-		err := r.ParseForm()
-		if err != nil {
-			http.Error(w, "Form is not valid 1", http.StatusBadRequest)
+}
+
+func validationMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/login" || r.Method != http.MethodPost {
+			next.ServeHTTP(w, r)
 			return
 		}
 		login := r.FormValue("login")
 		password := r.FormValue("password")
-		if password == "" || login == "" {
-			http.Error(w, "Form is not valid 2", http.StatusBadRequest)
-			return
+		err := ""
+		title := ""
+		data := PageData{
+			Title:    title,
+			Error:    err,
+			Username: login,
 		}
-		response := "Logged as " + login
-		setSession(w, login) // temporary
-		w.Write([]byte(response))
-	}
+		if login == "admin" && password == "secure" {
+			data.Title = "Successfully login"
+			data.Username = login
+			setSession(w, login)
+			http.Redirect(w, r, "/profile", http.StatusFound)
+			return
+		} else {
+			data.Title = "Вход"
+			data.Error = "Ошибка: Неверный логин или пароль"
+			err := tmpl.ExecuteTemplate(w, "layout.html", data)
+			if err != nil {
+				http.Error(w, "Internal error", http.StatusInternalServerError)
+				return
+			}
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
@@ -165,6 +182,6 @@ func main() {
 	mux.HandleFunc("/logout", logoutHandler)
 	mux.HandleFunc("/login", LoginHandler)
 	mux.HandleFunc("/profile", ProfileHandler)
-	MuxModified := recoveryMiddleware(loggingMiddleware(mux))
+	MuxModified := recoveryMiddleware(loggingMiddleware(validationMiddleware(mux)))
 	http.ListenAndServe(":8080", MuxModified)
 }
