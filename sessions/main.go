@@ -76,7 +76,7 @@ type PageData struct {
 }
 
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
-	if username, ok := getSession(r); ok {
+	if username, ok := getSession(r); ok { // temporary
 		if r.Method == "GET" {
 			data := PageData{
 				Title:    "Личный кабинет",
@@ -88,7 +88,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		http.Redirect(w, r, "/login", http.StatusOK)
+		http.Redirect(w, r, "/login", http.StatusOK) // temporary
 	}
 }
 
@@ -118,7 +118,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		response := "Logged as " + login
-		setSession(w, login)
+		setSession(w, login) // temporary
 		w.Write([]byte(response))
 	}
 }
