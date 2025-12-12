@@ -1,5 +1,14 @@
 {{define "contentprofile"}}
     <p>Hello, {{.Username}}</p>
+    {{if .Avatar}}
+        <img src="{{.Avatar}}" alt="Аватар" style="max-width:200px; border-radius:50%;">
+    {{end}}
+    <form method="post" enctype="multipart/form-data" action="/upload-avatar">
+        <p>
+        <input type="file" name="avatar" accept="image/*">
+    </p>
+    <button type="submit">Загрузить аватар</button>
+    </form>
     <form action="/logout" method="POST">
         <button type = "submit">Выйти</button>
     </form>
